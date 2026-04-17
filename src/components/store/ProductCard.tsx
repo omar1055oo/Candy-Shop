@@ -5,6 +5,7 @@ import type { Product } from "@/types";
 import { useCartStore } from "@/store/cartStore";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { getStockShortageToast } from "@/lib/cartStock";
 
 interface ProductCardProps {
   product: Product;
@@ -20,7 +21,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
       toast({ title: "نفد المخزون", variant: "destructive" });
       return;
     }
-    addItem(product);
+    const result = addItem(product);
+    if (!result.ok) {
+      toast(getStockShortageToast(result));
+      return;
+    }
     setAdded(true);
     toast({ title: `تمت إضافة ${product.product_name} إلى السلة` });
     setTimeout(() => setAdded(false), 1200);

@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import StoreHeader from "@/components/store/StoreHeader";
 import ExistingOrderSummary from "@/components/store/ExistingOrderSummary";
 import { useOrderDetails } from "@/hooks/useOrderDetails";
+import { useToast } from "@/hooks/use-toast";
+import { getStockShortageToast } from "@/lib/cartStock";
 
 const CartPage = () => {
+  const { toast } = useToast();
   const { items, removeItem, updateQuantity, totalPrice, clearCart, addToOrderId } = useCartStore();
   const { data: existingOrder, isLoading: isLoadingOrder } = useOrderDetails(addToOrderId);
 
@@ -59,7 +62,15 @@ const CartPage = () => {
                   <Minus className="h-3 w-3" />
                 </Button>
                 <span className="w-8 text-center font-semibold">{item.quantity}</span>
-                <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => updateQuantity(item.product.products_id, item.quantity + 1)}>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    const result = updateQuantity(item.product.products_id, item.quantity + 1);
+                    if (!result.ok) toast(getStockShortageToast(result));
+                  }}
+                >
                   <Plus className="h-3 w-3" />
                 </Button>
               </div>

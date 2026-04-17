@@ -20,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { fetchFirstCartStockViolation, getStockShortageToast } from "@/lib/cartStock";
 
 const TURNSTILE_SITE_KEY = "0x4AAAAAAC-lPdvNlYWWU2Ar";
 const blockedStatuses = new Set(["delivered", "cancelled"]);
@@ -113,6 +114,17 @@ const CheckoutPage = () => {
       if (!validateNewOrderFormFields()) return;
     }
 
+    try {
+      const stockViolation = await fetchFirstCartStockViolation(items);
+      if (stockViolation) {
+        toast(getStockShortageToast(stockViolation));
+        return;
+      }
+    } catch {
+      toast({ title: "تعذر التحقق من المخزون", variant: "destructive" });
+      return;
+    }
+
     if (!turnstileToken) {
       toast({ title: "يرجى إكمال التحقق أولاً", variant: "destructive" });
       return;
@@ -142,6 +154,18 @@ const CheckoutPage = () => {
   const confirmOrder = async () => {
     setShowConfirm(false);
     try {
+      let stockViolation: { productName: string; available: number } | null;
+      try {
+        stockViolation = await fetchFirstCartStockViolation(items);
+      } catch {
+        toast({ title: "تعذر التحقق من المخزون", variant: "destructive" });
+        return;
+      }
+      if (stockViolation) {
+        toast(getStockShortageToast(stockViolation));
+        return;
+      }
+
       if (addToOrderId) {
         if (isExistingOrderBlocked(existingOrder)) {
           setAddToOrderId(null);
