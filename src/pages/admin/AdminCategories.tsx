@@ -13,6 +13,7 @@ const AdminCategories = () => {
   const { data: categories = [], isLoading } = useCategories();
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editIcon, setEditIcon] = useState("");
@@ -24,19 +25,25 @@ const AdminCategories = () => {
       toast({ title: "أدخل اسم القسم", variant: "destructive" });
       return;
     }
-    const { error } = await supabase.from("categories").insert({
-      name: newName.trim(),
-      icon_url: newIcon.trim() || null,
-      sort_order: categories.length,
-    });
-    if (error) {
-      toast({ title: "حدث خطأ", variant: "destructive" });
-      return;
+    
+    setIsAdding(true);
+    try {
+      const { error } = await supabase.from("categories").insert({
+        name: newName.trim(),
+        icon_url: newIcon.trim() || null,
+        sort_order: categories.length,
+      });
+      if (error) {
+        toast({ title: "حدث خطأ", variant: "destructive" });
+        return;
+      }
+      setNewName("");
+      setNewIcon("");
+      toast({ title: "تم إضافة القسم" });
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    } finally {
+      setIsAdding(false);
     }
-    setNewName("");
-    setNewIcon("");
-    toast({ title: "تم إضافة القسم" });
-    queryClient.invalidateQueries({ queryKey: ["categories"] });
   };
 
   const handleDelete = async (id: string) => {
@@ -90,9 +97,15 @@ const AdminCategories = () => {
           onChange={(e) => setNewIcon(e.target.value)}
           className="flex-1"
         />
-        <Button onClick={handleAdd} className="shrink-0">
-          <Plus className="h-4 w-4 ml-2" />
-          إضافة
+        <Button onClick={handleAdd} className="shrink-0" disabled={isAdding}>
+          {isAdding ? (
+            "جاري الإضافة..."
+          ) : (
+            <>
+              <Plus className="h-4 w-4 ml-2" />
+              إضافة
+            </>
+          )}
         </Button>
       </div>
 
