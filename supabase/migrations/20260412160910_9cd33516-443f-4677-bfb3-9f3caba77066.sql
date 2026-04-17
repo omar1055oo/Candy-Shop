@@ -1,0 +1,1 @@
+ALTER TABLE public.products ALTER COLUMN product_quantity TYPE numeric USING product_quantity::numeric;

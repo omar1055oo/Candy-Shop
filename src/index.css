@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 340 30% 97%;
+    --foreground: 340 15% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 340 15% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 340 15% 20%;
+
+    --primary: 340 60% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 340 25% 90%;
+    --secondary-foreground: 340 20% 25%;
+
+    --muted: 340 15% 93%;
+    --muted-foreground: 340 10% 50%;
+
+    --accent: 20 70% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 340 15% 90%;
+    --input: 340 15% 88%;
+    --ring: 340 60% 65%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 340 20% 18%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 340 60% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 340 18% 26%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 340 15% 25%;
+    --sidebar-ring: 340 60% 65%;
+  }
+
+  .dark {
+    --background: 340 15% 8%;
+    --foreground: 0 0% 92%;
+    --card: 340 15% 12%;
+    --card-foreground: 0 0% 92%;
+    --popover: 340 15% 12%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 340 55% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 340 15% 20%;
+    --secondary-foreground: 0 0% 90%;
+    --muted: 340 10% 18%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 20 65% 55%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 55% 35%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 340 10% 20%;
+    --input: 340 10% 20%;
+    --ring: 340 55% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    direction: rtl;
+  }
+
+  body {
+    @apply bg-background text-foreground font-cairo antialiased;
+    background-image: radial-gradient(circle, hsl(340 30% 88% / 0.4) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
+
+@layer utilities {
+  .grid-product {
+    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6;
+  }
+}
