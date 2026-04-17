@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useId, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,15 @@ const ProductEditDialog = ({ product, open, onClose }: Props) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: categories = [] } = useCategories();
+  const formUid = useId();
+  const ids = {
+    productName: `${formUid}-edit-name`,
+    price: `${formUid}-edit-price`,
+    quantity: `${formUid}-edit-quantity`,
+    description: `${formUid}-edit-description`,
+    imageUrl: `${formUid}-edit-image-url`,
+    category: `${formUid}-edit-category`,
+  };
 
   // تحديث البيانات فقط عند فتح النافذة بمنتج جديد
   useEffect(() => {
@@ -83,57 +92,74 @@ const ProductEditDialog = ({ product, open, onClose }: Props) => {
         </DialogHeader>
         <div className="space-y-4 mt-2">
           <div>
-            <label className="text-sm font-medium mb-1 block">اسم المنتج</label>
-            <Input 
-              className="rounded-lg" 
-              value={form.product_name} 
-              onChange={(e) => setForm({ ...form, product_name: e.target.value })} 
+            <label htmlFor={ids.productName} className="text-sm font-medium mb-1 block">
+              اسم المنتج
+            </label>
+            <Input
+              id={ids.productName}
+              className="rounded-lg"
+              value={form.product_name}
+              onChange={(e) => setForm({ ...form, product_name: e.target.value })}
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium mb-1 block">السعر</label>
-              <Input 
-                type="number" 
-                className="rounded-lg" 
-                value={form.product_price} 
-                onChange={(e) => setForm({ ...form, product_price: e.target.value })} 
+              <label htmlFor={ids.price} className="text-sm font-medium mb-1 block">
+                السعر
+              </label>
+              <Input
+                id={ids.price}
+                type="number"
+                className="rounded-lg"
+                value={form.product_price}
+                onChange={(e) => setForm({ ...form, product_price: e.target.value })}
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">المخزون</label>
-              <Input 
-                type="number" 
-                className="rounded-lg" 
-                value={form.product_quantity} 
-                onChange={(e) => setForm({ ...form, product_quantity: e.target.value })} 
+              <label htmlFor={ids.quantity} className="text-sm font-medium mb-1 block">
+                المخزون
+              </label>
+              <Input
+                id={ids.quantity}
+                type="number"
+                className="rounded-lg"
+                value={form.product_quantity}
+                onChange={(e) => setForm({ ...form, product_quantity: e.target.value })}
               />
             </div>
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-1 block">الوصف</label>
-            <Textarea 
-              className="rounded-lg resize-none" 
-              value={form.description} 
-              onChange={(e) => setForm({ ...form, description: e.target.value })} 
+            <label htmlFor={ids.description} className="text-sm font-medium mb-1 block">
+              الوصف
+            </label>
+            <Textarea
+              id={ids.description}
+              className="rounded-lg resize-none"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-1 block">رابط الصورة</label>
-            <Input 
-              className="rounded-lg" 
-              value={form.image_url} 
-              onChange={(e) => setForm({ ...form, image_url: e.target.value })} 
+            <label htmlFor={ids.imageUrl} className="text-sm font-medium mb-1 block">
+              رابط الصورة
+            </label>
+            <Input
+              id={ids.imageUrl}
+              className="rounded-lg"
+              value={form.image_url}
+              onChange={(e) => setForm({ ...form, image_url: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium mb-1 block">القسم</label>
+            <label htmlFor={ids.category} className="text-sm font-medium mb-1 block">
+              القسم
+            </label>
             <Select value={form.category_id} onValueChange={(v) => setForm({ ...form, category_id: v })}>
-              <SelectTrigger className="rounded-lg">
+              <SelectTrigger id={ids.category} className="rounded-lg">
                 <SelectValue placeholder="اختر القسم" />
               </SelectTrigger>
               <SelectContent className="rounded-lg">

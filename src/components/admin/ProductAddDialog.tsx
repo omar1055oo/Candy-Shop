@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,15 @@ const ProductAddDialog = ({ open, onClose }: Props) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: categories = [] } = useCategories();
+  const formUid = useId();
+  const ids = {
+    productName: `${formUid}-product-name`,
+    price: `${formUid}-price`,
+    quantity: `${formUid}-quantity`,
+    description: `${formUid}-description`,
+    imageUrl: `${formUid}-image-url`,
+    category: `${formUid}-category`,
+  };
 
   const handleSave = async () => {
     if (!form.product_name.trim()) {
@@ -63,29 +72,41 @@ const ProductAddDialog = ({ open, onClose }: Props) => {
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <label className="text-sm font-medium mb-1 block">اسم المنتج</label>
-            <Input value={form.product_name} onChange={(e) => setForm({ ...form, product_name: e.target.value })} />
+            <label htmlFor={ids.productName} className="text-sm font-medium mb-1 block">
+              اسم المنتج
+            </label>
+            <Input id={ids.productName} value={form.product_name} onChange={(e) => setForm({ ...form, product_name: e.target.value })} />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1 block">السعر</label>
-            <Input type="number" value={form.product_price} onChange={(e) => setForm({ ...form, product_price: e.target.value })} />
+            <label htmlFor={ids.price} className="text-sm font-medium mb-1 block">
+              السعر
+            </label>
+            <Input id={ids.price} type="number" value={form.product_price} onChange={(e) => setForm({ ...form, product_price: e.target.value })} />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1 block">الكمية</label>
-            <Input type="number" value={form.product_quantity} onChange={(e) => setForm({ ...form, product_quantity: e.target.value })} />
+            <label htmlFor={ids.quantity} className="text-sm font-medium mb-1 block">
+              الكمية
+            </label>
+            <Input id={ids.quantity} type="number" value={form.product_quantity} onChange={(e) => setForm({ ...form, product_quantity: e.target.value })} />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1 block">الوصف</label>
-            <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            <label htmlFor={ids.description} className="text-sm font-medium mb-1 block">
+              الوصف
+            </label>
+            <Textarea id={ids.description} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1 block">رابط الصورة</label>
-            <Input value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
+            <label htmlFor={ids.imageUrl} className="text-sm font-medium mb-1 block">
+              رابط الصورة
+            </label>
+            <Input id={ids.imageUrl} value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
           </div>
           <div>
-            <label className="text-sm font-medium mb-1 block">القسم</label>
+            <label htmlFor={ids.category} className="text-sm font-medium mb-1 block">
+              القسم
+            </label>
             <Select value={form.category_id} onValueChange={(v) => setForm({ ...form, category_id: v })}>
-              <SelectTrigger>
+              <SelectTrigger id={ids.category}>
                 <SelectValue placeholder="اختر القسم" />
               </SelectTrigger>
               <SelectContent>

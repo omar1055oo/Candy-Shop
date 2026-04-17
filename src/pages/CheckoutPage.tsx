@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "@/store/cartStore";
 import { useCreateOrder } from "@/hooks/useOrders";
@@ -45,6 +45,13 @@ const CheckoutPage = () => {
     address: "",
     honeypot: "",
   });
+  const checkoutFormUid = useId();
+  const fieldIds = {
+    name: `${checkoutFormUid}-customer-name`,
+    phone: `${checkoutFormUid}-customer-phone`,
+    address: `${checkoutFormUid}-customer-address`,
+    honeypot: `${checkoutFormUid}-website`,
+  };
 
   useEffect(() => {
     const existing = document.querySelector('script[src*="turnstile"]');
@@ -254,6 +261,7 @@ const CheckoutPage = () => {
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
+            id={fieldIds.honeypot}
             type="text"
             name="website"
             value={form.honeypot}
@@ -261,16 +269,22 @@ const CheckoutPage = () => {
             className="hidden"
             tabIndex={-1}
             autoComplete="off"
+            aria-hidden="true"
           />
           {!addToOrderId && (
             <>
               <div>
-                <label className="text-sm font-medium mb-1 block">الاسم الكامل</label>
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={100} />
+                <label htmlFor={fieldIds.name} className="text-sm font-medium mb-1 block">
+                  الاسم الكامل
+                </label>
+                <Input id={fieldIds.name} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} maxLength={100} />
               </div>
               <div>
-                <label className="text-sm font-medium mb-1 block">رقم الهاتف</label>
+                <label htmlFor={fieldIds.phone} className="text-sm font-medium mb-1 block">
+                  رقم الهاتف
+                </label>
                 <Input
+                  id={fieldIds.phone}
                   type="tel"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -284,8 +298,10 @@ const CheckoutPage = () => {
                 )}
               </div>
               <div>
-                <label className="text-sm font-medium mb-1 block">العنوان</label>
-                <Textarea value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} maxLength={500} />
+                <label htmlFor={fieldIds.address} className="text-sm font-medium mb-1 block">
+                  العنوان
+                </label>
+                <Textarea id={fieldIds.address} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} maxLength={500} />
               </div>
             </>
           )}
