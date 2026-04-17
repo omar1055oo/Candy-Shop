@@ -91,9 +91,7 @@ CREATE POLICY "Active banners are viewable by everyone"
 CREATE OR REPLACE FUNCTION public.auto_draft_no_image()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.image_url IS NULL THEN
-    NEW.status := 'Draft';
-  ELSIF NEW.image_url = '' THEN
+  IF NULLIF(NEW.image_url, '') IS NULL THEN
     NEW.status := 'Draft';
   END IF;
   RETURN NEW;
