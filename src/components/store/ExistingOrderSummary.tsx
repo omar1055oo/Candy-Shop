@@ -78,17 +78,10 @@ const ExistingOrderSummary = ({ order, newItems, isLoading = false }: ExistingOr
             <div className="space-y-2">
               {currentItems.map((item) => (
                 <div key={item.id} className="flex items-center justify-between gap-3 text-sm">
-<<<<<<< HEAD
-                  <span className="text-foreground">
-                    {item.product_name} × {item.quantity}
-                  </span>
-                  <span className="font-medium text-foreground">{formatMoney(item.price * item.quantity)}</span>
-=======
                   <span className="min-w-0 flex-1 truncate text-foreground">
                     {item.product_name} × {item.quantity}
                   </span>
                   <span className="shrink-0 font-medium text-foreground">{formatMoney(item.price * item.quantity)}</span>
->>>>>>> 6db493f (feat: initial commit with clean code and UI fixes)
                 </div>
               ))}
             </div>
@@ -106,17 +99,10 @@ const ExistingOrderSummary = ({ order, newItems, isLoading = false }: ExistingOr
             <div className="space-y-2">
               {newItems.map((item) => (
                 <div key={item.product.products_id} className="flex items-center justify-between gap-3 text-sm">
-<<<<<<< HEAD
-                  <span className="text-foreground">
-                    {item.product.product_name} × {item.quantity}
-                  </span>
-                  <span className="font-medium text-primary">
-=======
                   <span className="min-w-0 flex-1 truncate text-foreground">
                     {item.product.product_name} × {item.quantity}
                   </span>
                   <span className="shrink-0 font-medium text-primary">
->>>>>>> 6db493f (feat: initial commit with clean code and UI fixes)
                     {formatMoney(item.product.product_price * item.quantity)}
                   </span>
                 </div>
