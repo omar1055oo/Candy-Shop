@@ -51,6 +51,7 @@ const CartPage = () => {
               <img
                 src={item.product.image_url || "/placeholder.svg"}
                 alt={item.product.product_name}
+<<<<<<< HEAD
                 className="h-20 w-20 rounded-md object-cover"
               />
               <div className="flex-1">
@@ -58,6 +59,15 @@ const CartPage = () => {
                 <p className="text-sm text-primary font-bold">{item.product.product_price.toFixed(2)} ج.م</p>
               </div>
               <div className="flex items-center gap-2">
+=======
+                className="h-20 w-20 shrink-0 rounded-md object-cover"
+              />
+              <div className="flex-1 min-w-0">
+                <h3 className="truncate font-semibold text-card-foreground">{item.product.product_name}</h3>
+                <p className="text-sm text-primary font-bold">{item.product.product_price.toFixed(2)} ج.م</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+>>>>>>> 6db493f (feat: initial commit with clean code and UI fixes)
                 <Button size="icon" variant="outline" className="h-8 w-8" onClick={() => updateQuantity(item.product.products_id, item.quantity - 1)}>
                   <Minus className="h-3 w-3" />
                 </Button>
@@ -74,7 +84,11 @@ const CartPage = () => {
                   <Plus className="h-3 w-3" />
                 </Button>
               </div>
+<<<<<<< HEAD
               <Button size="icon" variant="ghost" className="text-destructive" onClick={() => removeItem(item.product.products_id)}>
+=======
+              <Button size="icon" variant="ghost" className="shrink-0 text-destructive" onClick={() => removeItem(item.product.products_id)}>
+>>>>>>> 6db493f (feat: initial commit with clean code and UI fixes)
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>

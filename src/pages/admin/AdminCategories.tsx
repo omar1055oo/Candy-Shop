@@ -148,7 +148,13 @@ const AdminCategories = () => {
                 </div>
               ) : (
                 <>
+<<<<<<< HEAD
                   <span className="flex-1 font-medium text-card-foreground">{cat.name}</span>
+=======
+                  <span className="flex-1 min-w-0 max-w-[18rem] overflow-hidden text-ellipsis whitespace-nowrap font-medium text-card-foreground sm:max-w-[24rem]">
+                    {cat.name}
+                  </span>
+>>>>>>> 6db493f (feat: initial commit with clean code and UI fixes)
                   <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => startEdit(cat)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>

@@ -16,7 +16,7 @@ const CategoriesSection = ({ selectedCategory, onSelectCategory }: Props) => {
     return (
       <section className="py-6">
         <h2 className="mb-4 text-lg font-bold text-foreground">تسوق حسب الفئة</h2>
-        <div className="flex gap-4 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-2">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="flex flex-col items-center gap-2">
               <Skeleton className="h-16 w-16 rounded-full" />
@@ -33,7 +33,7 @@ const CategoriesSection = ({ selectedCategory, onSelectCategory }: Props) => {
   return (
     <section className="py-6">
       <h2 className="mb-4 text-lg font-bold text-foreground">تسوق حسب الفئة</h2>
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {categories.map((cat, i) => {
           const isSelected = selectedCategory === cat.id;
           return (
@@ -44,7 +44,7 @@ const CategoriesSection = ({ selectedCategory, onSelectCategory }: Props) => {
               transition={{ delay: i * 0.06, duration: 0.3 }}
               whileTap={{ scale: 0.92 }}
               onClick={() => onSelectCategory(cat.id)}
-              className="flex flex-shrink-0 flex-col items-center gap-2"
+              className="flex w-20 flex-shrink-0 flex-col items-center gap-2"
             >
               <div
                 className={cn(
@@ -60,10 +60,14 @@ const CategoriesSection = ({ selectedCategory, onSelectCategory }: Props) => {
                   <Tag className="h-6 w-6 text-primary" />
                 )}
               </div>
-              <span className={cn(
-                "text-xs font-medium",
+              <span
+                className={cn(
+                "block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs font-medium",
                 isSelected ? "text-primary font-bold" : "text-foreground"
-              )}>{cat.name}</span>
+              )}
+              >
+                {cat.name}
+              </span>
             </motion.button>
           );
         })}
