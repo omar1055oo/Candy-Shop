@@ -134,7 +134,7 @@ const AccountPage = () => {
           </Button>
         </div>
 
-        <p className="mb-4 text-xs text-muted-foreground">يتم عرض آخر 3 طلبات فقط لتسريع الصفحة.</p>
+        <p className="mb-4 text-xs text-muted-foreground"> يتم عرض آخر 3 طلبات فقط .</p>
 
         <AnimatePresence mode="wait">
           {searched && !loading && orders.length === 0 && (
