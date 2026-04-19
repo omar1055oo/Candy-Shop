@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, Search, FileSpreadsheet, Loader2, Archive, Eye, Pencil } from "lucide-react";
-import { useAdminProductsPage, useAllProducts } from "@/hooks/useProducts";
+import { useAdminProductsCounts, useAdminProductsPage, useAllProducts } from "@/hooks/useProducts";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +26,7 @@ import {
 
 const AdminProducts = () => {
   const { data: allProducts = [] } = useAllProducts();
+  const { data: counts } = useAdminProductsCounts();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
@@ -246,7 +247,7 @@ const AdminProducts = () => {
         </div>
       ) : (
         <Tabs
-          defaultValue="active"
+          value={activeTab}
           dir="rtl"
           onValueChange={(v) => {
             const next = v === "archived" ? "archived" : "active";
@@ -255,10 +256,10 @@ const AdminProducts = () => {
           }}
         >
           <TabsList className="mb-4">
-            <TabsTrigger value="active">نشط ({allProducts.filter((p) => p.status === "Active").length})</TabsTrigger>
+            <TabsTrigger value="active">نشط ({counts?.activeCount ?? 0})</TabsTrigger>
             <TabsTrigger value="archived">
               <Archive className="h-4 w-4 ml-1" />
-              مؤرشف ({allProducts.filter((p) => p.status === "Draft").length})
+              مؤرشف ({counts?.archivedCount ?? 0})
             </TabsTrigger>
           </TabsList>
 
@@ -288,9 +289,9 @@ const AdminProducts = () => {
             </div>
           </TabsContent>
 
-          <div className="mt-6">
-            <Pagination>
-              <PaginationContent>
+          <div className="mt-6 overflow-x-auto pb-1">
+            <Pagination className="justify-start sm:justify-center">
+              <PaginationContent className="flex-nowrap">
                 <PaginationItem>
                   <PaginationPrevious
                     href="#"
@@ -298,7 +299,8 @@ const AdminProducts = () => {
                       e.preventDefault();
                       setCurrentPage((p) => Math.max(1, p - 1));
                     }}
-                    className={currentPage <= 1 ? "pointer-events-none opacity-50" : undefined}
+                    size="icon"
+                    className={currentPage <= 1 ? "pointer-events-none opacity-50 h-9 w-9" : "h-9 w-9"}
                   />
                 </PaginationItem>
 
@@ -310,6 +312,8 @@ const AdminProducts = () => {
                       <PaginationLink
                         href="#"
                         isActive={item === currentPage}
+                        size="icon"
+                        className="h-9 w-9"
                         onClick={(e) => {
                           e.preventDefault();
                           setCurrentPage(item);
@@ -328,7 +332,8 @@ const AdminProducts = () => {
                       e.preventDefault();
                       setCurrentPage((p) => Math.min(totalPages, p + 1));
                     }}
-                    className={currentPage >= totalPages ? "pointer-events-none opacity-50" : undefined}
+                    size="icon"
+                    className={currentPage >= totalPages ? "pointer-events-none opacity-50 h-9 w-9" : "h-9 w-9"}
                   />
                 </PaginationItem>
               </PaginationContent>

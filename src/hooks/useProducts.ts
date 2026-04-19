@@ -46,6 +46,11 @@ export type AdminProductsPageResult = {
   currentPage: number;
 };
 
+export type AdminProductsCountsResult = {
+  activeCount: number;
+  archivedCount: number;
+};
+
 export const useAdminProductsPage = ({
   status,
   searchQuery,
@@ -82,6 +87,26 @@ export const useAdminProductsPage = ({
         totalPages,
         pageSize,
         currentPage: normalizedPage,
+      };
+    },
+  });
+};
+
+export const useAdminProductsCounts = () => {
+  return useQuery({
+    queryKey: ["admin-products-counts"],
+    queryFn: async (): Promise<AdminProductsCountsResult> => {
+      const [activeRes, archivedRes] = await Promise.all([
+        supabase.from("products").select("products_id", { count: "exact", head: true }).eq("status", "Active"),
+        supabase.from("products").select("products_id", { count: "exact", head: true }).eq("status", "Draft"),
+      ]);
+
+      if (activeRes.error) throw activeRes.error;
+      if (archivedRes.error) throw archivedRes.error;
+
+      return {
+        activeCount: activeRes.count ?? 0,
+        archivedCount: archivedRes.count ?? 0,
       };
     },
   });
