@@ -47,8 +47,17 @@ export type AdminProductsPageResult = {
 };
 
 export type AdminProductsCountsResult = {
+  totalCount: number;
   activeCount: number;
   archivedCount: number;
+};
+
+export type AdminLowStockPageResult = {
+  products: Product[];
+  totalCount: number;
+  totalPages: number;
+  pageSize: number;
+  currentPage: number;
 };
 
 export const useAdminProductsPage = ({
@@ -96,17 +105,54 @@ export const useAdminProductsCounts = () => {
   return useQuery({
     queryKey: ["admin-products-counts"],
     queryFn: async (): Promise<AdminProductsCountsResult> => {
-      const [activeRes, archivedRes] = await Promise.all([
+      const [totalRes, activeRes, archivedRes] = await Promise.all([
+        supabase.from("products").select("products_id", { count: "exact", head: true }),
         supabase.from("products").select("products_id", { count: "exact", head: true }).eq("status", "Active"),
         supabase.from("products").select("products_id", { count: "exact", head: true }).eq("status", "Draft"),
       ]);
 
+      if (totalRes.error) throw totalRes.error;
       if (activeRes.error) throw activeRes.error;
       if (archivedRes.error) throw archivedRes.error;
 
       return {
+        totalCount: totalRes.count ?? 0,
         activeCount: activeRes.count ?? 0,
         archivedCount: archivedRes.count ?? 0,
+      };
+    },
+  });
+};
+
+export const useAdminLowStockPage = (currentPage: number, pageSize = PAGE_SIZE) => {
+  return useQuery({
+    queryKey: ["admin-low-stock-page", currentPage, pageSize],
+    queryFn: async (): Promise<AdminLowStockPageResult> => {
+      const normalizedPage = Number.isFinite(currentPage) && currentPage > 0 ? Math.floor(currentPage) : 1;
+      const from = (normalizedPage - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      const { data, error, count } = await supabase
+        .from("products")
+        .select("*", { count: "exact" })
+        .eq("status", "Active")
+        .gt("product_quantity", 0)
+        .lt("product_quantity", 5)
+        .order("product_quantity", { ascending: true })
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      if (error) throw error;
+
+      const totalCount = count ?? 0;
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+      return {
+        products: (data || []) as Product[],
+        totalCount,
+        totalPages,
+        pageSize,
+        currentPage: normalizedPage,
       };
     },
   });
