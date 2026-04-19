@@ -61,6 +61,15 @@ export type AdminLowStockPageResult = {
   currentPage: number;
 };
 
+export type AdminBestSellersPageResult = {
+  products: Product[];
+  totalCount: number;
+  totalPages: number;
+  pageSize: number;
+  currentPage: number;
+  bestSellersCount: number;
+};
+
 export const useAdminProductsPage = ({
   status,
   searchQuery,
@@ -161,6 +170,52 @@ export const useAdminLowStockPage = (currentPage: number, searchQuery?: string, 
         totalPages,
         pageSize,
         currentPage: normalizedPage,
+      };
+    },
+  });
+};
+
+export const useAdminBestSellersPage = (currentPage: number, searchQuery?: string, pageSize = PAGE_SIZE) => {
+  return useQuery({
+    queryKey: ["admin-best-sellers-page", currentPage, searchQuery, pageSize],
+    queryFn: async (): Promise<AdminBestSellersPageResult> => {
+      const normalizedPage = Number.isFinite(currentPage) && currentPage > 0 ? Math.floor(currentPage) : 1;
+      const from = (normalizedPage - 1) * pageSize;
+      const to = from + pageSize - 1;
+
+      let productsQuery = supabase
+        .from("products")
+        .select("*", { count: "exact" })
+        .eq("status", "Active")
+        .order("created_at", { ascending: false })
+        .range(from, to);
+
+      if (searchQuery && searchQuery.trim()) {
+        productsQuery = productsQuery.ilike("product_name", `%${searchQuery.trim()}%`);
+      }
+
+      const [productsRes, bestCountRes] = await Promise.all([
+        productsQuery,
+        supabase
+          .from("products")
+          .select("products_id", { count: "exact", head: true })
+          .eq("status", "Active")
+          .eq("is_best_seller", true),
+      ]);
+
+      if (productsRes.error) throw productsRes.error;
+      if (bestCountRes.error) throw bestCountRes.error;
+
+      const totalCount = productsRes.count ?? 0;
+      const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+      return {
+        products: (productsRes.data || []) as Product[],
+        totalCount,
+        totalPages,
+        pageSize,
+        currentPage: normalizedPage,
+        bestSellersCount: bestCountRes.count ?? 0,
       };
     },
   });
