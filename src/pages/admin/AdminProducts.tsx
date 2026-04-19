@@ -1,4 +1,5 @@
-import { useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ import {
 const AdminProducts = () => {
   const { data: allProducts = [] } = useAllProducts();
   const { data: counts } = useAdminProductsCounts();
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
@@ -69,6 +71,13 @@ const AdminProducts = () => {
 
     return pages;
   }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    const requestedTab = searchParams.get("tab");
+    const nextTab: "active" | "archived" = requestedTab === "archived" ? "archived" : "active";
+    setActiveTab(nextTab);
+    setCurrentPage(1);
+  }, [searchParams]);
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("products").delete().eq("products_id", id);

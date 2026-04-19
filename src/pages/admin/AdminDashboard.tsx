@@ -11,11 +11,11 @@ const AdminDashboard = () => {
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
 
   const stats = [
-    { label: "إجمالي المنتجات", value: (counts?.totalCount ?? 0).toString(), icon: Package, color: "bg-primary/10 text-primary" },
-    { label: "المنتجات المؤرشفة", value: (counts?.archivedCount ?? 0).toString(), icon: Archive, color: "bg-muted text-muted-foreground" },
-    { label: "منتجات أقل من 5 قطع", value: (counts?.lowStockCount ?? 0).toString(), icon: AlertTriangle, color: "bg-yellow-100 text-yellow-700", href: "/admin/low-stock" },
-    { label: "الطلبات الجديدة", value: pendingOrders.toString(), icon: ShoppingBag, color: "bg-accent/20 text-accent-foreground" },
-    { label: "إجمالي الطلبات", value: orders.length.toString(), icon: TrendingUp, color: "bg-blue-100 text-blue-700" },
+    { label: "إجمالي المنتجات", value: (counts?.totalCount ?? 0).toString(), icon: Package, color: "bg-primary/10 text-primary", href: "/admin/products" },
+    { label: "المنتجات المؤرشفة", value: (counts?.archivedCount ?? 0).toString(), icon: Archive, color: "bg-muted text-muted-foreground", href: "/admin/products?tab=archived" },
+    { label: "منتجات أقل من 5 قطع", value: (counts?.lowStockCount ?? 0).toString(), icon: AlertTriangle, color: "bg-accent/20 text-accent-foreground", href: "/admin/low-stock" },
+    { label: "الطلبات الجديدة", value: pendingOrders.toString(), icon: ShoppingBag, color: "bg-accent/20 text-accent-foreground", href: "/admin/orders?status=pending" },
+    { label: "إجمالي الطلبات", value: orders.length.toString(), icon: TrendingUp, color: "bg-blue-100 text-blue-700", href: "/admin/orders" },
   ];
 
   return (
@@ -24,7 +24,7 @@ const AdminDashboard = () => {
         {stats.map((stat) => {
           const Icon = stat.icon;
           const Card = (
-            <div key={stat.label} className="bg-card rounded-lg p-5 shadow-sm transition hover:shadow-md">
+            <div className="bg-card rounded-lg p-5 shadow-sm transition hover:shadow-md">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">{stat.label}</p>
@@ -37,15 +37,11 @@ const AdminDashboard = () => {
             </div>
           );
 
-          if (stat.href) {
-            return (
-              <Link key={stat.label} to={stat.href} className="block">
-                {Card}
-              </Link>
-            );
-          }
-
-          return Card;
+          return (
+            <Link key={stat.label} to={stat.href} className="block">
+              {Card}
+            </Link>
+          );
         })}
       </div>
     </AdminLayout>

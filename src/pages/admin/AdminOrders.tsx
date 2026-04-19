@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,9 +24,12 @@ const statusOptions = [
 
 const AdminOrders = () => {
   const { data: orders = [], isLoading } = useOrders();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
+  const statusFilter = searchParams.get("status");
+  const visibleOrders = statusFilter ? orders.filter((order) => order.status === statusFilter) : orders;
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     const { error } = await supabase
@@ -50,10 +54,10 @@ const AdminOrders = () => {
               <Skeleton key={i} className="h-28 w-full rounded-xl" />
             ))}
           </div>
-        ) : orders.length === 0 ? (
+        ) : visibleOrders.length === 0 ? (
           <div className="p-12 text-center text-muted-foreground">لا توجد طلبات بعد</div>
         ) : (
-          orders.map((order) => {
+          visibleOrders.map((order) => {
             const st = statusOptions.find((s) => s.value === order.status) || statusOptions[0];
             const isExpanded = expandedOrderId === order.id;
             return (
