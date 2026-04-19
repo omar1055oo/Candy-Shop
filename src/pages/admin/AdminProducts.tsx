@@ -96,6 +96,7 @@ const AdminProducts = () => {
     queryClient.invalidateQueries({ queryKey: ["best-sellers"] });
     queryClient.invalidateQueries({ queryKey: ["admin-products-page"] });
     queryClient.invalidateQueries({ queryKey: ["admin-products-counts"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-low-stock-page"] });
   };
 
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

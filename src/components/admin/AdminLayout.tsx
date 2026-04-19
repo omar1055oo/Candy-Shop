@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   Layers,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,6 +19,7 @@ const navItems = [
   { path: "/admin", label: "لوحة التحكم", icon: LayoutDashboard },
   { path: "/admin/products", label: "المنتجات", icon: Package },
   { path: "/admin/categories", label: "الأقسام", icon: Layers },
+  { path: "/admin/low-stock", label: "أقل من 5 قطع", icon: AlertTriangle },
   { path: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
   { path: "/admin/banners", label: "البانرات", icon: Image },
   { path: "/admin/best-sellers", label: "الأكثر مبيعاً", icon: Star },
