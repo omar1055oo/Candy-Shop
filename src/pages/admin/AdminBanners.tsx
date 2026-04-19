@@ -19,6 +19,12 @@ const AdminBanners = () => {
   const [editingImageUrl, setEditingImageUrl] = useState("");
   const [editingTargetUrl, setEditingTargetUrl] = useState("");
 
+  const isTargetUrlMissingColumnError = (message?: string) => {
+    if (!message) return false;
+    const lower = message.toLowerCase();
+    return lower.includes("target_url") && (lower.includes("column") || lower.includes("schema cache"));
+  };
+
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("banners").delete().eq("id", id);
     if (error) {
@@ -34,14 +40,28 @@ const AdminBanners = () => {
       toast({ title: "يرجى إدخال رابط الصورة", variant: "destructive" });
       return;
     }
-    const { error } = await supabase.from("banners").insert({
+    const payload = {
       image_url: newUrl,
       target_url: targetUrl.trim() || null,
       sort_order: banners.length,
-    });
+    };
+
+    const { error } = await supabase.from("banners").insert(payload);
     if (error) {
-      toast({ title: "حدث خطأ أثناء الإضافة", variant: "destructive" });
-      return;
+      if (isTargetUrlMissingColumnError(error.message)) {
+        const retry = await supabase.from("banners").insert({
+          image_url: newUrl,
+          sort_order: banners.length,
+        });
+
+        if (retry.error) {
+          toast({ title: "حدث خطأ أثناء الإضافة", description: retry.error.message, variant: "destructive" });
+          return;
+        }
+      } else {
+        toast({ title: "حدث خطأ أثناء الإضافة", description: error.message, variant: "destructive" });
+        return;
+      }
     }
     setNewUrl("");
     setTargetUrl("");
@@ -67,17 +87,31 @@ const AdminBanners = () => {
       return;
     }
 
+    const payload = {
+      image_url: editingImageUrl.trim(),
+      target_url: editingTargetUrl.trim() || null,
+    };
+
     const { error } = await supabase
       .from("banners")
-      .update({
-        image_url: editingImageUrl.trim(),
-        target_url: editingTargetUrl.trim() || null,
-      })
+      .update(payload)
       .eq("id", id);
 
     if (error) {
-      toast({ title: "حدث خطأ أثناء التعديل", variant: "destructive" });
-      return;
+      if (isTargetUrlMissingColumnError(error.message)) {
+        const retry = await supabase
+          .from("banners")
+          .update({ image_url: editingImageUrl.trim() })
+          .eq("id", id);
+
+        if (retry.error) {
+          toast({ title: "حدث خطأ أثناء التعديل", description: retry.error.message, variant: "destructive" });
+          return;
+        }
+      } else {
+        toast({ title: "حدث خطأ أثناء التعديل", description: error.message, variant: "destructive" });
+        return;
+      }
     }
 
     toast({ title: "تم تحديث البانر" });
