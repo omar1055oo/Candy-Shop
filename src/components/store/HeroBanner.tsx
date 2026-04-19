@@ -37,11 +37,26 @@ const HeroBanner = () => {
           transition={{ duration: 0.5 }}
           className="absolute inset-0"
         >
-          <img
-            src={banners[current].image_url}
-            alt="عرض"
-            className="h-full w-full object-cover"
-          />
+          {banners[current].target_url ? (
+            <a
+              href={banners[current].target_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block h-full w-full"
+            >
+              <img
+                src={banners[current].image_url}
+                alt="عرض"
+                className="h-full w-full object-cover"
+              />
+            </a>
+          ) : (
+            <img
+              src={banners[current].image_url}
+              alt="عرض"
+              className="h-full w-full object-cover"
+            />
+          )}
         </motion.div>
       </AnimatePresence>
 

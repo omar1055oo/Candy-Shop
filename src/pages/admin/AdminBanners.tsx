@@ -1,7 +1,7 @@
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2 } from "lucide-react";
+import { Check, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useBanners } from "@/hooks/useBanners";
@@ -14,6 +14,10 @@ const AdminBanners = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [newUrl, setNewUrl] = useState("");
+  const [targetUrl, setTargetUrl] = useState("");
+  const [editingBannerId, setEditingBannerId] = useState<string | null>(null);
+  const [editingImageUrl, setEditingImageUrl] = useState("");
+  const [editingTargetUrl, setEditingTargetUrl] = useState("");
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("banners").delete().eq("id", id);
@@ -32,6 +36,7 @@ const AdminBanners = () => {
     }
     const { error } = await supabase.from("banners").insert({
       image_url: newUrl,
+      target_url: targetUrl.trim() || null,
       sort_order: banners.length,
     });
     if (error) {
@@ -39,7 +44,44 @@ const AdminBanners = () => {
       return;
     }
     setNewUrl("");
+    setTargetUrl("");
     toast({ title: "تم إضافة البانر" });
+    queryClient.invalidateQueries({ queryKey: ["banners"] });
+  };
+
+  const startEdit = (id: string, imageUrl: string, bannerTargetUrl: string | null) => {
+    setEditingBannerId(id);
+    setEditingImageUrl(imageUrl);
+    setEditingTargetUrl(bannerTargetUrl || "");
+  };
+
+  const cancelEdit = () => {
+    setEditingBannerId(null);
+    setEditingImageUrl("");
+    setEditingTargetUrl("");
+  };
+
+  const handleSaveEdit = async (id: string) => {
+    if (!editingImageUrl.trim()) {
+      toast({ title: "يرجى إدخال رابط الصورة", variant: "destructive" });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("banners")
+      .update({
+        image_url: editingImageUrl.trim(),
+        target_url: editingTargetUrl.trim() || null,
+      })
+      .eq("id", id);
+
+    if (error) {
+      toast({ title: "حدث خطأ أثناء التعديل", variant: "destructive" });
+      return;
+    }
+
+    toast({ title: "تم تحديث البانر" });
+    cancelEdit();
     queryClient.invalidateQueries({ queryKey: ["banners"] });
   };
 
@@ -52,6 +94,11 @@ const AdminBanners = () => {
           placeholder="رابط صورة البانر الجديد"
           value={newUrl}
           onChange={(e) => setNewUrl(e.target.value)}
+        />
+        <Input
+          placeholder="الرابط عند الضغط على البانر (اختياري)"
+          value={targetUrl}
+          onChange={(e) => setTargetUrl(e.target.value)}
         />
         <Button onClick={handleAdd} className="w-full sm:w-auto">
           <Plus className="h-4 w-4 ml-2" />
@@ -77,18 +124,71 @@ const AdminBanners = () => {
                   loading="lazy"
                 />
               </div>
-              <div className="flex items-center justify-between p-2 gap-2">
-                <p className="text-xs text-muted-foreground truncate flex-1 min-w-0">
-                  {banner.image_url}
-                </p>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="text-destructive shrink-0 h-8 w-8"
-                  onClick={() => handleDelete(banner.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+              <div className="p-2 space-y-2">
+                {editingBannerId === banner.id ? (
+                  <>
+                    <Input
+                      value={editingImageUrl}
+                      onChange={(e) => setEditingImageUrl(e.target.value)}
+                      placeholder="رابط الصورة"
+                    />
+                    <Input
+                      value={editingTargetUrl}
+                      onChange={(e) => setEditingTargetUrl(e.target.value)}
+                      placeholder="رابط التحويل (اختياري)"
+                    />
+                  </>
+                ) : (
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <p className="text-xs text-muted-foreground truncate">
+                      صورة: {banner.image_url}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      رابط: {banner.target_url || "-"}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end gap-1">
+                  {editingBannerId === banner.id ? (
+                    <>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="shrink-0 h-8 w-8"
+                        onClick={() => handleSaveEdit(banner.id)}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="shrink-0 h-8 w-8"
+                        onClick={cancelEdit}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="shrink-0 h-8 w-8"
+                      onClick={() => startEdit(banner.id, banner.image_url, banner.target_url)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  )}
+
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-destructive shrink-0 h-8 w-8"
+                    onClick={() => handleDelete(banner.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
