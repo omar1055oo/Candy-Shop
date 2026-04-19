@@ -49,8 +49,10 @@ const AdminBanners = () => {
     const { error } = await supabase.from("banners").insert(payload);
     if (error) {
       if (isTargetUrlMissingColumnError(error.message)) {
+        // تم إضافة target_url هنا لضمان عدم ضياعه في حالة الـ retry
         const retry = await supabase.from("banners").insert({
           image_url: newUrl,
+          target_url: targetUrl.trim() || null,
           sort_order: banners.length,
         });
 
@@ -99,9 +101,13 @@ const AdminBanners = () => {
 
     if (error) {
       if (isTargetUrlMissingColumnError(error.message)) {
+        // تم إضافة target_url هنا لضمان عدم ضياعه في حالة الـ retry
         const retry = await supabase
           .from("banners")
-          .update({ image_url: editingImageUrl.trim() })
+          .update({ 
+            image_url: editingImageUrl.trim(),
+            target_url: editingTargetUrl.trim() || null 
+          })
           .eq("id", id);
 
         if (retry.error) {
