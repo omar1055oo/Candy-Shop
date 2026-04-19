@@ -94,6 +94,8 @@ const AdminProducts = () => {
     queryClient.invalidateQueries({ queryKey: ["all-products"] });
     queryClient.invalidateQueries({ queryKey: ["products"] });
     queryClient.invalidateQueries({ queryKey: ["best-sellers"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-products-page"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-products-counts"] });
   };
 
   const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -289,55 +291,75 @@ const AdminProducts = () => {
             </div>
           </TabsContent>
 
-          <div className="mt-6 overflow-x-auto pb-1">
-            <Pagination className="justify-start sm:justify-center">
-              <PaginationContent className="flex-nowrap">
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCurrentPage((p) => Math.max(1, p - 1));
-                    }}
-                    size="icon"
-                    className={currentPage <= 1 ? "pointer-events-none opacity-50 h-9 w-9" : "h-9 w-9"}
-                  />
-                </PaginationItem>
+          <div className="mt-6">
+            <div className="sm:hidden flex items-center justify-between gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+              >
+                السابق
+              </Button>
+              <div className="text-sm text-muted-foreground">
+                صفحة {currentPage} من {totalPages}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+              >
+                التالي
+              </Button>
+            </div>
 
-                {paginationItems.map((item, idx) => (
-                  <PaginationItem key={`${item}-${idx}`}>
-                    {item === "ellipsis" ? (
-                      <PaginationEllipsis />
-                    ) : (
-                      <PaginationLink
-                        href="#"
-                        isActive={item === currentPage}
-                        size="icon"
-                        className="h-9 w-9"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage(item);
-                        }}
-                      >
-                        {item}
-                      </PaginationLink>
-                    )}
+            <div className="hidden sm:block overflow-x-auto pb-1">
+              <Pagination className="justify-center">
+                <PaginationContent className="flex-nowrap">
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage((p) => Math.max(1, p - 1));
+                      }}
+                      className={currentPage <= 1 ? "pointer-events-none opacity-50" : undefined}
+                    />
                   </PaginationItem>
-                ))}
 
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setCurrentPage((p) => Math.min(totalPages, p + 1));
-                    }}
-                    size="icon"
-                    className={currentPage >= totalPages ? "pointer-events-none opacity-50 h-9 w-9" : "h-9 w-9"}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+                  {paginationItems.map((item, idx) => (
+                    <PaginationItem key={`${item}-${idx}`}>
+                      {item === "ellipsis" ? (
+                        <PaginationEllipsis />
+                      ) : (
+                        <PaginationLink
+                          href="#"
+                          isActive={item === currentPage}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setCurrentPage(item);
+                          }}
+                        >
+                          {item}
+                        </PaginationLink>
+                      )}
+                    </PaginationItem>
+                  ))}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage((p) => Math.min(totalPages, p + 1));
+                      }}
+                      className={currentPage >= totalPages ? "pointer-events-none opacity-50" : undefined}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
         </Tabs>
       )}
