@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, Search, FileSpreadsheet, Loader2, Archive, Eye, Pencil } from "lucide-react";
-import { useAllProducts } from "@/hooks/useProducts";
+import { useAdminProductsPage, useAllProducts } from "@/hooks/useProducts";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,10 +14,21 @@ import ProductEditDialog from "@/components/admin/ProductEditDialog";
 import ProductAddDialog from "@/components/admin/ProductAddDialog";
 import type { Product } from "@/types";
 import * as XLSX from "xlsx";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const AdminProducts = () => {
-  const { data: products = [], isLoading } = useAllProducts();
+  const { data: allProducts = [] } = useAllProducts();
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<{ added: number; updated: number } | null>(null);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
@@ -26,11 +37,37 @@ const AdminProducts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const activeProducts = products.filter((p) => p.status === "Active");
-  const archivedProducts = products.filter((p) => p.status === "Draft");
+  const status = activeTab === "active" ? "Active" : "Draft";
+  const { data, isLoading } = useAdminProductsPage({
+    status,
+    searchQuery: search,
+    currentPage,
+  });
 
-  const filterBySearch = (list: typeof products) =>
-    list.filter((p) => p.product_name.includes(search));
+  const products = data?.products ?? [];
+  const totalPages = data?.totalPages ?? 1;
+
+  const paginationItems = useMemo(() => {
+    const pages: Array<number | "ellipsis"> = [];
+    const maxButtons = 7;
+
+    if (totalPages <= maxButtons) {
+      for (let p = 1; p <= totalPages; p++) pages.push(p);
+      return pages;
+    }
+
+    const windowSize = 2;
+    const start = Math.max(2, currentPage - windowSize);
+    const end = Math.min(totalPages - 1, currentPage + windowSize);
+
+    pages.push(1);
+    if (start > 2) pages.push("ellipsis");
+    for (let p = start; p <= end; p++) pages.push(p);
+    if (end < totalPages - 1) pages.push("ellipsis");
+    pages.push(totalPages);
+
+    return pages;
+  }, [currentPage, totalPages]);
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("products").delete().eq("products_id", id);
@@ -90,7 +127,7 @@ const AdminProducts = () => {
         return;
       }
 
-      const existingIds = new Set(products.map((p) => p.products_id));
+      const existingIds = new Set(allProducts.map((p) => p.products_id));
 
       const batchSize = 100;
       let added = 0;
@@ -175,7 +212,10 @@ const AdminProducts = () => {
           <Input
             placeholder="بحث عن منتج..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             className="pr-10"
           />
         </div>
@@ -205,21 +245,29 @@ const AdminProducts = () => {
           ))}
         </div>
       ) : (
-        <Tabs defaultValue="active" dir="rtl">
+        <Tabs
+          defaultValue="active"
+          dir="rtl"
+          onValueChange={(v) => {
+            const next = v === "archived" ? "archived" : "active";
+            setActiveTab(next);
+            setCurrentPage(1);
+          }}
+        >
           <TabsList className="mb-4">
-            <TabsTrigger value="active">نشط ({activeProducts.length})</TabsTrigger>
+            <TabsTrigger value="active">نشط ({allProducts.filter((p) => p.status === "Active").length})</TabsTrigger>
             <TabsTrigger value="archived">
               <Archive className="h-4 w-4 ml-1" />
-              مؤرشف ({archivedProducts.length})
+              مؤرشف ({allProducts.filter((p) => p.status === "Draft").length})
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="active">
             <div className="space-y-2">
-              {filterBySearch(activeProducts).map((p) => (
+              {products.map((p) => (
                 <ProductCard key={p.products_id} product={p} />
               ))}
-              {filterBySearch(activeProducts).length === 0 && (
+              {products.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">لا توجد منتجات</div>
               )}
             </div>
@@ -231,14 +279,61 @@ const AdminProducts = () => {
               أضف صورة ووصف من زر التعديل وسيتم تفعيله تلقائياً
             </div>
             <div className="space-y-2">
-              {filterBySearch(archivedProducts).map((p) => (
+              {products.map((p) => (
                 <ProductCard key={p.products_id} product={p} showActivateBtn />
               ))}
-              {filterBySearch(archivedProducts).length === 0 && (
+              {products.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">لا توجد منتجات</div>
               )}
             </div>
           </TabsContent>
+
+          <div className="mt-6">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage((p) => Math.max(1, p - 1));
+                    }}
+                    className={currentPage <= 1 ? "pointer-events-none opacity-50" : undefined}
+                  />
+                </PaginationItem>
+
+                {paginationItems.map((item, idx) => (
+                  <PaginationItem key={`${item}-${idx}`}>
+                    {item === "ellipsis" ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        href="#"
+                        isActive={item === currentPage}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(item);
+                        }}
+                      >
+                        {item}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage((p) => Math.min(totalPages, p + 1));
+                    }}
+                    className={currentPage >= totalPages ? "pointer-events-none opacity-50" : undefined}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         </Tabs>
       )}
 
